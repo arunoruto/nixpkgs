@@ -4972,6 +4972,15 @@ let
         sha512 = "XVaNKa9ahqppSvyNsSayC6TILe4FvBla8zxytCpxZMjrLYLxMt7ny/QCltp9tP8ElDSITALsrKo/wLjab36YEQ==";
       };
     };
+    "@github/copilot-language-server-1.269.0" = {
+      name = "copilot-language-server";
+      packageName = "copilot-language-server";
+      version = "1.269.0";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@github/copilot-language-server/-/copilot-language-server-1.269.0.tgz";
+        sha512 = "3n9wz5kcqzfifyk1x293m9fr5lsvlfpbjzasgdc19hc3ycll9xcxsrcs4r63r6ah70b1id97p46j179a016d2jr7xfmbjhjp2gks2xw";
+      };
+    };
     "@graphql-cli/common-4.1.0" = {
       name = "_at_graphql-cli_slash_common";
       packageName = "@graphql-cli/common";
