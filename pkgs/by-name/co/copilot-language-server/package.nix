@@ -1,6 +1,7 @@
 {
   lib,
   stdenvNoCC,
+  buildFHSEnv,
   fetchzip,
   nix-update-script,
 }:
@@ -24,30 +25,47 @@ let
     }
     ."${stdenvNoCC.hostPlatform.system}"
       or (throw "Unsupported system: ${stdenvNoCC.hostPlatform.system}");
-in
 
+  executableName = "copilot-language-server";
+  fhs =
+    { package }:
+    buildFHSEnv {
+      name = package.meta.mainProgram;
+      version = package.version;
+      targetPkgs = pkgs: [ pkgs.stdenv.cc.cc.lib ];
+      runScript = lib.getExe package;
+
+      meta = package.meta // {
+        description =
+          package.meta.description
+          + " (FHS-wrapped). Use this version if you have trouble with the normal one.";
+      };
+    };
+in
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "copilot-language-server";
-  version = "1.290.0";
+  version = "1.292.0";
 
   src = fetchzip {
     url = "https://github.com/github/copilot-language-server-release/releases/download/${finalAttrs.version}/copilot-language-server-native-${finalAttrs.version}.zip";
-    hash = "sha256-ELOSeb3Z7AI8pjDhtUIRoaf+4UXjXKEu/OJ2CLQno6A=";
+    hash = "sha256-nWhAKf9TiAXbOkjnXPWs/FDDFFN3hp/7hWMQ4MP8cto=";
     stripRoot = false;
   };
 
-  npmDepsHash = "sha256-PLX/mN7xu8gMh2BkkyTncP3+rJ3nBmX+pHxl0ONXbe4=";
   installPhase = ''
     runHook preInstall
 
-    install -Dt "$out"/bin "${os}-${arch}"/copilot-language-server
+    install "${os}-${arch}/${executableName}" -Dm755 -t "$out"/bin
 
     runHook postInstall
   '';
 
   dontStrip = true;
 
-  passthru.updateScript = nix-update-script { };
+  passthru = {
+    updateScript = nix-update-script { };
+    fhs = fhs { package = finalAttrs.finalPackage; };
+  };
 
   meta = {
     description = "Use GitHub Copilot with any editor or IDE via the Language Server Protocol";
@@ -60,7 +78,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
       shortName = "GitHub Copilot License";
       url = "https://github.com/customer-terms/github-copilot-product-specific-terms";
     };
-    mainProgram = "copilot-language-server";
+    mainProgram = executableName;
     platforms = [
       "x86_64-linux"
       "aarch64-linux"
